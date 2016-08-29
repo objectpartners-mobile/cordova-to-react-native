@@ -1,0 +1,10 @@
+# Too big for github
+*com.googlemaps.ios*
+*cordova-plugin-googlemaps*
+cordova/superfit-tracker/platforms/*
+cordova/superfit-tracker/plugins/*
+react-native/SuperfitTracker/node_modules*
+react-native/SuperfitTracker/ios/build/*
+react-native/SuperfitTracker/android/build/*
+react-native/SuperfitTracker/android/.gradle/*
+react-native/SuperfitTracker/android/app/build/*
