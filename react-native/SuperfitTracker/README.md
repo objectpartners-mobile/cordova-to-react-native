@@ -1,4 +1,4 @@
-This is the React Native version of the SuperfitTracker app. To build and run the app, follow these instructions.
+This is the React Native version of the SuperfitTracker app. To build and run the app, follow these instructions. This app was built with React Native v 0.31.0 with the iOS 9.2 SDK in XCode 7.2. If compiling in XCode 8, you may get errors from RCTWebSocket. You can work around these by removing the compiler warning flags for that target. See here: [https://github.com/facebook/react-native/issues/8584#issuecomment-236366222](https://github.com/facebook/react-native/issues/8584#issuecomment-236366222)
 
 **Install node modules**
 
