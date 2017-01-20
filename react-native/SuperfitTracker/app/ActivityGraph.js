@@ -165,7 +165,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
     paddingTop: 20,
-    paddingBottom: 20
+    paddingBottom: 20,
+    flex: .5
   },
   yAxisLabel: {
     position: 'absolute',
