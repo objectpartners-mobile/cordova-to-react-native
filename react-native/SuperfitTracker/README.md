@@ -70,3 +70,38 @@ geo fix -99.0123 44.1234
 geo fix -99.1234 44.0432
 ...
 ```
+
+<br>
+**Windows Version**
+
+For running the Windows version of the app within a Windows VM, and still using your host machine for development and for running the react-native packager, map localhost in the VM to your host's ip address:
+
+In VirtualBox for example, in your VM's hosts file:
+
+```
+C:\Windows\System32\drivers\etc\hosts
+```
+
+add
+
+```
+10.0.2.2	localhost
+```
+
+If that doesn't work, you may need to map it to another host name, like "reactnativehost", or whatever you prefer. In that case, you will need to directly modify the react-native-windows node module.
+
+```
+node_modules\react-native-windows\ReactWindows\ReactNative.Shared\DevSupport\DevServerHelper.cs
+```
+
+and change
+
+```
+private const string DeviceLocalhost = "localhost:8081";
+```
+
+to
+
+```
+private const string DeviceLocalhost = “reactnativehost:8081";
+```
