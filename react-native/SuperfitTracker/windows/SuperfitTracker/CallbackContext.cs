@@ -28,7 +28,7 @@ namespace SuperfitTracker
          *
          * @param message The message to add to the success result.
          */
-        public void success(JsonObject message)
+        public void success(JObject message)
         {
             try
             {
@@ -83,7 +83,7 @@ namespace SuperfitTracker
          *
          * @param message The message to add to the error result.
          */
-        public void error(JsonObject message)
+        public void error(JObject message)
         {
             try
             {

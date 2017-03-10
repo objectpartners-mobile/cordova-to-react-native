@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, ListView, View, Text, TouchableHighlight } from 'react-native';
+import { StyleSheet, ListView, View, Text, TouchableHighlight, Platform } from 'react-native';
 import Swipeout from 'react-native-swipeout';
 
 export default class ActivityList extends Component {
@@ -78,7 +78,9 @@ export default class ActivityList extends Component {
 
       if (resultSet.rows != null && resultSet.rows.length > 0) {
         for (var i=0; i<resultSet.rows.length; i++) {
-          items.push(resultSet.rows.item(i));
+          var item = Platform.OS == "windows" ? resultSet.rows[i] : resultSet.rows.item(i);
+
+          items.push(item);
         }
       }
 

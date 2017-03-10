@@ -11,23 +11,25 @@ namespace SuperfitTracker
 {
     class ReactJsonConverter
     {
-        public static Dictionary<string, object> jsonToReact(JsonObject jsonObject)
+        public static Dictionary<string, object> jsonToReact(JObject jsonObject)
         {
             Dictionary<string, object> writableMap = new Dictionary<string, object>();
+            IList<string> keys = jsonObject.Properties().Select(p => p.Name).ToList();
 
-            foreach (String key in jsonObject.Keys)
+            foreach (String key in keys)
             {
-                Object value = jsonObject.GetNamedObject(key);
+                JToken jToken = jsonObject.GetValue(key);
+                JTokenType value = jToken.Type;
 
-                if (value is float || value is double || value is int) {
-                    writableMap.Add(key, jsonObject.GetNamedNumber(key));
-                } else if (value is string) {
-                    writableMap.Add(key, jsonObject.GetNamedString(key));
-                } else if (value is JsonObject) {
-                    writableMap.Add(key, jsonObject.GetNamedObject(key));
-                } else if (value is JsonArray) {
-                    writableMap.Add(key, jsonObject.GetNamedArray(key));
-                } else if (value == null) {
+                if (value == JTokenType.Float|| value == JTokenType.Integer) {
+                    writableMap.Add(key, jToken.ToObject<Double>());
+                } else if (value == JTokenType.String) {
+                    writableMap.Add(key, jToken.ToObject<String>());
+                } else if (value == JTokenType.Object) {
+                    writableMap.Add(key, jToken.ToObject<JObject>());
+                } else if (value == JTokenType.Array) {
+                    writableMap.Add(key, jToken.ToObject<JArray>());
+                } else if (value == JTokenType.Null) {
                     writableMap.Add(null, null);
                 }
             }
@@ -35,24 +37,33 @@ namespace SuperfitTracker
             return writableMap;
         }
 
-        public static Object[] jsonToReact(JArray jsonArray)
+        public static object[] jsonToReact(JArray jsonArray)
         {
-            Object[] writableArray = new Object[jsonArray.Count];
+            object[] writableArray = new object[jsonArray.Count];
 
             for (int i = 0; i < jsonArray.Count; i++)
             {
-                Object value = jsonArray[i];
-                uint index = (uint)i;
+                JToken jToken = jsonArray[i];
+                JTokenType value = jToken.Type;
 
-                if (value is float || value is double || value is int) {
-                    writableArray[i] = value;
-                } else if (value is string) {
-                    writableArray[i] = value;
-                } else if (value is Object) {
-                    writableArray[i] = value;
-                } else if (value is JsonArray) {
-                    writableArray[i] = value;
-                } else if (value == null) {
+                if (value == JTokenType.Float || value == JTokenType.Integer)
+                {
+                    writableArray[i] = jToken.ToObject<Double>();
+                }
+                else if (value == JTokenType.String)
+                {
+                    writableArray[i] = jToken.ToObject<String>();
+                }
+                else if (value == JTokenType.Object)
+                {
+                    writableArray[i] = jsonToReact(jToken.ToObject<JObject>());
+                }
+                else if (value == JTokenType.Array)
+                {
+                    writableArray[i] = jsonToReact(jToken.ToObject<JArray>());
+                }
+                else if (value == JTokenType.Null)
+                {
                     writableArray[i] = null;
                 }
             }

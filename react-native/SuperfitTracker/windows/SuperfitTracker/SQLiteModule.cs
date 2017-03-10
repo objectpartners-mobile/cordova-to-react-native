@@ -58,9 +58,9 @@ namespace ReactNative.Modules.SQLiteModule
         [ReactMethod]
         public void executeSql(string query, JArray parms, ICallback success, ICallback error)
         {
-            Object[] convertedParams = ReactJsonConverter.jsonToReact(parms);
+            object[] convertedParams = ReactJsonConverter.jsonToReact(parms);
 
-            this.execute(query, convertedParams, new CallbackContext(success, error));
+            this.execute(query, new CallbackContext(success, error), convertedParams);
         }
 
         [ReactMethod]
@@ -70,14 +70,43 @@ namespace ReactNative.Modules.SQLiteModule
             {
                 DbConnection.BeginTransaction();
 
-                for (int i = 0; i < queries.Count; i++)
+                foreach (JToken parsedValue in queries.Children())
                 {
-                    string query = (string)queries[i];
-                    Object[] parms = new Object[0];//queryObject.Length > 1 ? (Object[])queryObject[1] : new Object[0];
+                    JArray parameters = new JArray();
+                    String query = null;
 
-                    bool result = this.execute(query, parms, new CallbackContext(success, error));
+                    if (parsedValue.Type == JTokenType.Array)
+                    {
 
-                    if (!result)
+                        foreach (JToken token in parsedValue.Value<JArray>().Children())
+                        {
+                            if (token.Type == JTokenType.String)
+                            {
+                                query = token.Value<String>();
+                            }
+                            else
+                            {
+                                parameters.Add(token.ToObject<Object>());
+                            }
+                        }
+                    }
+                    else if (parsedValue.Type == JTokenType.String)
+                    {
+                        query = parsedValue.Value<String>();
+                    }
+
+                    object[] parms = ReactJsonConverter.jsonToReact(parameters);
+
+                    if (query != null)
+                    {
+                        bool result = this.execute(query, new CallbackContext(success, error), parms);
+
+                        if (!result)
+                        {
+                            DbConnection.Rollback();
+                            break;
+                        }
+                    } else
                     {
                         DbConnection.Rollback();
                         break;
@@ -92,7 +121,7 @@ namespace ReactNative.Modules.SQLiteModule
             }
         }
 
-        private bool execute(string query, Object[] parms, CallbackContext callbackContext)
+        private bool execute(string query, CallbackContext callbackContext, params object[] parms)
         {
             try
             {
@@ -102,16 +131,17 @@ namespace ReactNative.Modules.SQLiteModule
 
                     List<Activity> results = command.ExecuteQuery<Activity>();
     
-                    JsonObject jsonObject = new JsonObject();
-                    JsonArray jsonArray = new JsonArray();
+                    JObject jsonObject = new JObject();
+                    JArray jsonArray = new JArray();
 
                     foreach(Activity result in results)
                     {
-                        JsonObject rowResult = new JsonObject();
-                        rowResult.Add("id", JsonValue.CreateNumberValue(result.id));
-                        rowResult.Add("type", JsonValue.CreateNumberValue(result.id));
-                        rowResult.Add("dt", JsonValue.CreateNumberValue(result.id));
-                        rowResult.Add("gps_data", JsonValue.CreateNumberValue(result.id));
+                        JObject rowResult = new JObject();
+
+                        rowResult.Add("id", new JValue(result.id));
+                        rowResult.Add("type", new JValue(result.type));
+                        rowResult.Add("dt", new JValue(result.dt));
+                        rowResult.Add("gps_data", new JValue(result.gps_data));
 
                         jsonArray.Add(rowResult);    
                     }
@@ -121,7 +151,20 @@ namespace ReactNative.Modules.SQLiteModule
                 }
                 else
                 {
-                    DbConnection.Execute(query, parms);
+                    SQLiteCommand sql = DbConnection.CreateCommand(query);
+
+                    if (parms.Length == 1 && parms is object[])
+                    {
+                        var insertParams = (object[])parms[0];
+
+                        for (int i = 0; i < insertParams.Length; i++)
+                        {
+                            sql.Bind(insertParams[i]);
+                        }
+                    }
+
+                    int rows = sql.ExecuteNonQuery();
+
                     callbackContext.success();
                 }
             }
