@@ -32,6 +32,7 @@ namespace SuperfitTracker
                 return new List<IReactPackage>
                 {
                     new MainReactPackage(),
+                    new SQLitePackage()
                 };
             }
         }

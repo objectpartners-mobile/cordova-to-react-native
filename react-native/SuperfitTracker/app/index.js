@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { StyleSheet, Navigator, View } from 'react-native';
+import { StyleSheet, Navigator, View, Platform } from 'react-native';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
 
 import ActivityList from './ActivityList';
 import ViewActivity from './ViewActivity';
 import RecordActivity from './RecordActivity';
+import SQLiteModuleWindows from './SQLiteModuleWindows';
 
 //setup DB first
 let SQLite = require('react-native-sqlite-storage');
-let DB = SQLite.openDatabase({
+
+let DB = Platform.OS === "windows" ? SQLiteModuleWindows : SQLite.openDatabase({
           name: 'superfit.db',
           location: 'Documents'},
           function() {

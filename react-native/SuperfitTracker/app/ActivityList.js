@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, ListView, View, Text, TouchableHighlight } from 'react-native';
+import { StyleSheet, ListView, View, Text, TouchableHighlight, Platform } from 'react-native';
 import Swipeout from 'react-native-swipeout';
 
 export default class ActivityList extends Component {
@@ -28,7 +28,7 @@ export default class ActivityList extends Component {
           'CREATE TABLE IF NOT EXISTS activity (id, type, dt, gps_data)'
         ], function() {
           db.executeSql('SELECT * FROM activity', [], function (resultSet) {
-            if (resultSet.rows.length == 0) {
+            if (resultSet.rows != null && resultSet.rows.length == 0) {
               var testGpsDataRun = [
                 {lat: 38.603734, lng: -122.864112, alt: 5, timestamp: 1470248725288},
                 {lat: 38.608798, lng: -122.867714, alt: 6, timestamp: 1470249710222},
@@ -55,7 +55,7 @@ export default class ActivityList extends Component {
             } else {
               self.populateActivities(db);
             }
-          });
+          }, function(error){ console.log("Error inserting seed data.") });
         }, function(error) {
           console.log('Error with initDB sequence: ' + error.message);
         });
@@ -76,12 +76,16 @@ export default class ActivityList extends Component {
     db.executeSql("SELECT * FROM activity", [], function (resultSet) {
       var items = [];
 
-      for (var i=0; i<resultSet.rows.length; i++) {
-         items.push(resultSet.rows.item(i));
+      if (resultSet.rows != null && resultSet.rows.length > 0) {
+        for (var i=0; i<resultSet.rows.length; i++) {
+          var item = Platform.OS == "windows" ? resultSet.rows[i] : resultSet.rows.item(i);
+
+          items.push(item);
+        }
       }
 
       self.setState({dataSource: self.state.dataSource.cloneWithRows(items)});
-    });
+    }, function(error) {console.log("error fetching activities")} );
   }
 
   allowScroll(scrollEnabled) {
@@ -100,7 +104,7 @@ export default class ActivityList extends Component {
     db.executeSql("DELETE FROM activity where id = ?", [rowData.id], function (resultSet) {
      //reload data
      self.populateActivities(db);
-    });
+   }, function(error){ console.log("error deleting activity"); });
   }
 
   // navigate to ViewActivity
